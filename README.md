@@ -1,37 +1,50 @@
-# Purpose of This Repo
+# AI Customer Support & Bug Reporting Agent
 
-This repo is meant to be used to keep things organized during content development and act as the source of truth for all projects and exercises related to this course.
+## Overview
+This project implements an AI customer support agent integrated with AWS services. The agent automatically processes user inquiries, handles shipping FAQ requests, identifies out-of-scope interactions, and dynamically logs technical bug reports directly into an AWS DynamoDB table.
 
-## Folder Structure
+---
 
-### Lesson Folder
+## Project Structure
 
-This repo contains a folder for each `lesson` and one `project` folder.
+* **`system_prompt.txt`**: Defines system behavior, tool invocation rules, and scope boundaries. (##Went with direct system prompt, instead of Flows)
+* **`agentcore_config.json`**: Agent configuration and tool definitions.
+* **`flow-tests.json`**: Test cases covering bug reporting, FAQ lookup, and out-of-scope queries.
+* **`seed_db.py`**: Utility script to seed the DynamoDB table (`BugReports-9e3628b0`) with initial ticket data.
+* **`run_eval.py`**: Executes evaluation dataset generation across test scenarios.
+* **`eval_dataset.jsonl`**: Output dataset containing test prompts and reference responses for model evaluation.
+* **`chat.py`**: Command-line interface for multi-turn testing.
 
-Example
-```
-lesson-1-hello
-lesson-2-world
-lesson-3-foo
-lesson-4-bar
-project
-```
+---
 
-Each `lesson` folder is named using the naming convention of `lesson-#-name-of-lesson`.
+## Workflow & Implementation
 
-Example
-```
-lesson-1-hello
-```
+### 1. Database Seeding & Verification
+- **Execution**: Ran `seed_db.py` to write bug report items to the DynamoDB table `BugReports-9e3628b0`.
+- **Validation**: Verified data persistence by performing a scan on the DynamoDB console, confirming successful creation of ticket `BUG-05238d68` with all required attributes (`ticketId`, `description`, `environment`, and `stepsToReproduce`).
 
-Four lesson folders have been provided as a template; However, you may need to add more or possibly use less than four depending on what is needed.
+### 2. Multi-Turn Interactive Testing
+- Tested conversation flows via `chat.py` to ensure smooth tool switching, context retention across turns, and fallback mechanisms for out-of-scope queries.
 
-If you require an additional lesson folder, you can make a copy of the folder and paste it into the root directory.
+### 3. Dataset Evaluation Pipeline
+- Updated `flow-tests.json` with structured test inputs and input node parameters.
+- Executed `run_eval.py` to generate `eval_dataset.jsonl` containing structured evaluations for:
+  - **Bug Reporting:** Verifying correct extraction of environment and steps before DynamoDB insertion.
+  - **Shipping FAQ:** Direct context-based resolution.
+  - **Out-of-Scope:** Routing non-support queries to human customer support channels.
 
-### Exercises Folder
+---
 
-Each `lesson` folder contains an `exercises` folder. This `exercises` folder should contain all files and instructions necessary for the exercises along with the solution. The solutions for these exercises will be shared with students. See the `README` in the `exercises` folder for information about folder structure.
+## Evaluation Observations
 
-### Project Folder
+* **Tool Calling Accuracy:** The agent consistently triggered `create_bug_report` when presented with technical crash details while remaining within safety guardrails for out-of-scope prompts.
+* **Data Consistency:** DynamoDB scans confirmed 100% attribute alignment between extracted prompt entities and stored record keys.
+* **Flow Execution:** Successfully generated all 3 test lines into `eval_dataset.jsonl` without node validation errors.
 
-The `project` folder should contain all files and instructions necessary for setup. If possible, a set of instructions should be provided for both Udacity workspaces and a way to work locally (for both MacOS and Windows OS). At a minimum, one set of instructions should be provided. A `README` template has been provided in the project folder. This template layout should be used to write your README.
+---
+
+## Submission Artifacts
+
+1. **DynamoDB Scan Screenshot:** Demonstrating persisted item `BUG-05238d68`.
+2. **Terminal Chat Screenshot:** Interactive multi-turn log (`chat.py`).
+3. **Evaluation Screenshot:** `eval_dataset.jsonl` output generation.
