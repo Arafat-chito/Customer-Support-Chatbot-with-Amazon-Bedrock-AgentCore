@@ -1,50 +1,26 @@
-# AI Customer Support & Bug Reporting Agent
+# AWS Bedrock Customer Support Chatbot & Evaluation Pipeline
 
-## Overview
-This project implements an AI customer support agent integrated with AWS services. The agent automatically processes user inquiries, handles shipping FAQ requests, identifies out-of-scope interactions, and dynamically logs technical bug reports directly into an AWS DynamoDB table.
-
----
-
-## Project Structure
-
-* **`system_prompt.txt`**: Defines system behavior, tool invocation rules, and scope boundaries. (##Went with direct system prompt, instead of Flows)
-* **`agentcore_config.json`**: Agent configuration and tool definitions.
-* **`flow-tests.json`**: Test cases covering bug reporting, FAQ lookup, and out-of-scope queries.
-* **`seed_db.py`**: Utility script to seed the DynamoDB table (`BugReports-9e3628b0`) with initial ticket data.
-* **`run_eval.py`**: Executes evaluation dataset generation across test scenarios.
-* **`eval_dataset.jsonl`**: Output dataset containing test prompts and reference responses for model evaluation.
-* **`chat.py`**: Command-line interface for multi-turn testing.
+This repository contains the setup, flow invocation logic, and automated evaluation workflow for an AWS Bedrock agentic chatbot built for customer support operations.
 
 ---
 
-## Workflow & Implementation
+## Technical Architecture Overview
 
-### 1. Database Seeding & Verification
-- **Execution**: Ran `seed_db.py` to write bug report items to the DynamoDB table `BugReports-9e3628b0`.
-- **Validation**: Verified data persistence by performing a scan on the DynamoDB console, confirming successful creation of ticket `BUG-05238d68` with all required attributes (`ticketId`, `description`, `environment`, and `stepsToReproduce`).
+The application routes incoming customer prompts through an AWS Bedrock Flow (`Online_Shop`) designed to evaluate queries, trigger function nodes, and return responses. 
 
-### 2. Multi-Turn Interactive Testing
-- Tested conversation flows via `chat.py` to ensure smooth tool switching, context retention across turns, and fallback mechanisms for out-of-scope queries.
-
-### 3. Dataset Evaluation Pipeline
-- Updated `flow-tests.json` with structured test inputs and input node parameters.
-- Executed `run_eval.py` to generate `eval_dataset.jsonl` containing structured evaluations for:
-  - **Bug Reporting:** Verifying correct extraction of environment and steps before DynamoDB insertion.
-  - **Shipping FAQ:** Direct context-based resolution.
-  - **Out-of-Scope:** Routing non-support queries to human customer support channels.
+* **Bedrock Flow ID:** `D3MYMJVDRZ`
+* **Flow Alias ID:** `TSTALIASID` (working draft alias)
+* **Input Node Name:** `FlowInputNode`
+* **Evaluator Model:** `amazon.nova-pro-v1:0`
 
 ---
 
-## Evaluation Observations
+## File Structure
 
-* **Tool Calling Accuracy:** The agent consistently triggered `create_bug_report` when presented with technical crash details while remaining within safety guardrails for out-of-scope prompts.
-* **Data Consistency:** DynamoDB scans confirmed 100% attribute alignment between extracted prompt entities and stored record keys.
-* **Flow Execution:** Successfully generated all 3 test lines into `eval_dataset.jsonl` without node validation errors.
-
----
-
-## Submission Artifacts
-
-1. **DynamoDB Scan Screenshot:** Demonstrating persisted item `BUG-05238d68`.
-2. **Terminal Chat Screenshot:** Interactive multi-turn log (`chat.py`).
-3. **Evaluation Screenshot:** `eval_dataset.jsonl` output generation.
+```text
+├── flow-tests.json           # Input evaluation test cases and expected outputs
+├── generate-eval-dataset.py # Script invoking Bedrock Flow and generating BYOI JSONL dataset
+├── run_eval.py               # Wrapper script executing dataset generation pipeline
+├── eval_dataset.jsonl        # Generated evaluation dataset formatted for Bedrock Model Evaluation
+├── env.sh                    # Environment setup script for AWS credentials
+└── README.md                 # Project documentation
