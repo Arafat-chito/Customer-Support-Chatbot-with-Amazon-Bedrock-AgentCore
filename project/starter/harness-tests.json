@@ -1,0 +1,19 @@
+{
+    "tests": [
+      {
+        "id": "test-bug-report",
+        "prompt": "The checkout page crashes when I click the Pay button. Steps: 1. Add item to cart 2. Go to checkout 3. Click Pay. Environment: Chrome 120 on macOS.",
+        "expected": "The system should collect the bug details, invoke the create_bug_report tool, and return a ticket ID."
+      },
+      {
+        "id": "test-faq-shipping",
+        "prompt": "How much does shipping cost?",
+        "expected": "The system should answer directly using the FAQ content."
+      },
+      {
+        "id": "test-out-of-scope",
+        "prompt": "Where is your nearest physical store located?",
+        "expected": "The system should inform the user that this request is out of scope and provide the human support phone number."
+      }
+    ]
+  }
